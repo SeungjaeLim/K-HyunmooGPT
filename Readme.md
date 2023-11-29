@@ -4,7 +4,6 @@
 ---
 ![image](https://github.com/daily-kim/K-DS-Hackaton_History_LLM/assets/90249131/2887beb0-cc2b-445e-9c78-c8aa265168ee)
 
-
 * LLM serving
   * Local server (1* RTX 6000)
   * Docker
@@ -21,3 +20,7 @@
 
 * Gradio
   * Original code from [Baize](https://huggingface.co/spaces/project-baize/chat-with-baize)
+
+* Prompoting
+  
+...
