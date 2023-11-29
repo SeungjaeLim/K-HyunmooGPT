@@ -1,6 +1,7 @@
 
 ---
-20231128~20231129 K-DS-Hackaton 
+K-DS-Hackaton 
+20231128~20231129 
 ---
 ![image](https://github.com/daily-kim/K-DS-Hackaton_History_LLM/assets/90249131/2887beb0-cc2b-445e-9c78-c8aa265168ee)
 
