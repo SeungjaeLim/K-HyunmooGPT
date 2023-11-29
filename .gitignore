@@ -1,0 +1,6 @@
+chroma
+__pycache__
+.env
+*.pdf
+*.txt
+app/data
