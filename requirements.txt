@@ -1,0 +1,10 @@
+chromadb
+transformers
+sentence_transformers
+uvicorn
+fastapi
+PyPDF2
+chardet
+elasticsearch-async
+elasticsearch
+pandas

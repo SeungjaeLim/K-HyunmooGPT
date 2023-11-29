@@ -1,6 +1,6 @@
 chroma
 __pycache__
 .env
-*.pdf
-*.txt
+app/*/*.pdf
+app/*/*.txt
 app/data
