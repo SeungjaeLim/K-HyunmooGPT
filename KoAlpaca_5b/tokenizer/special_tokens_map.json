@@ -1,0 +1,11 @@
+{
+  "additional_special_tokens": [
+    "<|endoftext|>",
+    "<|sep|>",
+    "<|acc|>",
+    "<|tel|>",
+    "<|rrn|>"
+  ],
+  "eos_token": "<|endoftext|>",
+  "pad_token": "<|endoftext|>"
+}
