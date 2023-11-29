@@ -55,7 +55,7 @@ async def input_data(filename: DataInput):
     print(filename)
     text = pdf_file_load(filename)
 
-    documents = split_text(text, CHUNK_SIZE, CHUNK_SIZE//4)
+    documents = split_text(text, CHUNK_SIZE, CHUNK_SIZE*3//4)
     document_ids = [f"{filename}_{idx}" for idx in range(len(documents))]    
     collection.add(documents=documents, ids=document_ids)
     print("data count: ", len(documents))
@@ -85,7 +85,7 @@ async def er_input_data(filename: DataInput):
     print(filename)
     with open(filename, "r") as f:
         text = f.read()
-    documents = split_text(text, CHUNK_SIZE, CHUNK_SIZE//4)
+    documents = split_text(text, CHUNK_SIZE, CHUNK_SIZE*3//4)
     document_ids = [f"id{idx}" for idx in range(len(documents))]
 
     collection.add(documents=documents, ids=document_ids)

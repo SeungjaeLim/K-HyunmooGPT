@@ -4,3 +4,4 @@ __pycache__
 app/*/*.pdf
 app/*/*.txt
 app/data
+.DS_Store
