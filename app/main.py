@@ -1,5 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import pandas as pd
+
+from tqdm import tqdm
 from chromadb import PersistentClient
 from chromadb.utils import embedding_functions
 from pdf_data_load import pdf_file_load, split_text
@@ -18,8 +21,14 @@ sbert_model_name = 'jhgan/ko-sroberta-multitask'
 sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=sbert_model_name)
 
 # Get or create the Chroma collection
-collection = client.get_or_create_collection(name="test_0", embedding_function=sentence_transformer_ef)
-entity_relation_collection = client.get_or_create_collection(name="entity_relation", embedding_function=sentence_transformer_ef)
+collection = client.get_or_create_collection(name="chunk_store", 
+                                             embedding_function=sentence_transformer_ef,
+                                             metadata={"hnsw:space": "cosine"},
+                                             )
+kv_collection = client.get_or_create_collection(name="kv_store", 
+                                                embedding_function=sentence_transformer_ef,
+                                                metadata={"hnsw:space": "cosine"} ,
+                                                )
 
 class DataInput(BaseModel):
     filename: str
@@ -62,18 +71,55 @@ async def input_data(filename: DataInput):
 
     return {"message": "Data successfully added to the collection."}
 
-import pandas as pd
+
+@app.post("/data-input-kv")
+async def input_data(filename: DataInput):
+    # Read documents from a file and add them to the collection
+    filename = filename.filename
+
+    keys = []
+    documents = []
+
+
+    document_ids = [f"{filename}_{idx}" for idx in range(len(documents))]    
+
+    kv_collection.add(
+        embeddings=kv_collection.embedding_function.encode(keys),
+        documents=documents,
+        ids=document_ids,
+    )
+    # update items in a collection
+    collection.update()
+
+    return {"message": "Data successfully added to the collection."}
+
+
 @app.post("/data-input-thesaurus")
 async def input_data(filename: DataInput):
     # Read documents from a file and add them to the collection
     filename = filename.filename
     df = pd.read_csv(filename)
     documents = []
-    for idx, row in df.iterrows():
+    keys = []
+    embeddings = []
+    document_ids = []
+    for idx, row in tqdm(df.iterrows(), total=len(df)):
         doc = f"{row['term_name']} {row['term_kind']} {row['term_ch']} {row['term_remark']} {row['term_attr']} {row['term_year']} {row['term_times']} {row['term_lk']} {row['term_desc']}"
         documents.append(doc)
-    document_ids = [f"{filename}_{idx}" for idx in range(len(documents))]    
-    collection.add(documents=documents, ids=document_ids)
+        keys.append(row['term_name'])
+        document_ids.append(f"{filename}_{idx}")    
+        if len(keys) == 64:
+            embeddings = sentence_transformer_ef(keys)
+            kv_collection.add(documents=documents, ids=document_ids, embeddings=embeddings)
+            documents = []
+            keys = []
+            embeddings = []
+            document_ids = []
+            
+    embeddings = sentence_transformer_ef(keys)
+    kv_collection.add(documents=documents, ids=document_ids, embeddings=embeddings)
+    
+    embeddings += sentence_transformer_ef(keys)
     print("data count: ", len(documents))
 
     return {"message": "Data successfully added to the collection."}
@@ -127,14 +173,14 @@ async def query_top_n(data: QueryInput):
 
 
 
-@app.post("/query-keyword-top-n")
-async def query_keyword_top_n(data: QueryInput):
+@app.post("/query-kv-top-n")
+async def query_kv_top_n(data: QueryInput):
     query = data.query
     n_results = data.n_results
 
     try:
         # Include the source document and the Cosine Distance in the query result
-        result = collection.query(query_texts=[query], n_results=n_results, include=["documents", 'distances'])
+        result = kv_collection.query(query_texts=[query], n_results=n_results, include=["documents", 'distances'])
 
         # Extract the first (and only) list inside 'ids'
         ids = result.get('ids')[0]

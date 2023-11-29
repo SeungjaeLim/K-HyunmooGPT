@@ -3,5 +3,5 @@ __pycache__
 .env
 app/*/*.pdf
 app/*/*.txt
-app/data
+app/data/*
 .DS_Store
