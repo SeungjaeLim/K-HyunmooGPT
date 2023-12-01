@@ -1,0 +1,7 @@
+chroma
+__pycache__
+.env
+app/*/*.pdf
+app/*/*.txt
+app/data/*
+.DS_Store
